@@ -1,0 +1,177 @@
+<fieldset>
+	<p class="navbar-text float-right">
+		<% if user_signed_in? %>
+		Logged in as <strong><%= current_user.email %></strong>.
+		<%= link_to 'Edit profile', edit_user_registration_path, :class => 'navbar-link' %> |
+		<%= link_to "Logout", destroy_user_session_path, method: :delete, :class => 'navbar-link'  %>
+		<table class="table table-bordered">
+    <thead align="center">
+      <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Email</th>
+        <th>Mobile No</th>
+        <th>Status</th>
+        <th></th><th></th>
+      </tr>
+    </thead>
+    <tbody align="center"id="users">
+        <% @users.each do |user|%>
+        <%if current_user.has_role? :super_admin%>
+        <tr align="center">
+            <td><%=user.first_name%></td>
+            <td><%=user.last_name%></td>
+            <td><%=user.email%></td>
+            <td><%=user.mobile_no%></td>
+            <%if user.has_role? :admin%>
+            <td> Admin </td>
+            <%elsif user.has_role? :super_admin%>
+            <td> Super Admin</td>
+            <%else%>
+            <td> User </td>
+            <%end%>
+            <td><%= link_to 'Edit profile', edit_user_registration_path(user), class:'btn' %></td> 
+            
+            <td><%= link_to "delete", user, method: :delete,remote: true,data: { confirm: 'Are you sure?' }, class:'btn'%></td>
+        </tr>
+        <%else%>
+        <%if !user.has_role? :admin and !user.has_role? :super_admin%>
+        <tr align="center">
+            <td><%=user.first_name%></td>
+            <td><%=user.last_name%></td>
+            <td><%=user.email%></td>
+            <td><%=user.mobile_no%></td>
+            <%if current_user.has_role? :admin or current_user.has_role? :super_admin %>
+            <td><%= link_to 'Edit profile', edit_user_registration_path(user), class:'btn' %></td>
+            <td><%= link_to "delete", user, method: :delete,remote: true,data: { confirm: 'Are you sure?' }, class:'btn'%></td>
+            <%else%>
+            <td>-</td>
+            <td>-</td>
+            <%end%>
+        </tr>
+        <%end%>
+        <%end%>
+
+        <%end%>        
+    </tbody>
+  </table>
+
+
+
+
+
+		<% else %>
+		
+	</p>
+	<div class="modal fade" id="page1" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalToggleLabel">Modal 1</h5>
+					<a href="#" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+				</div>
+				<div class="modal-body">
+
+					<%= form_with(model: @user, local: false) do |f| %>
+
+					<div class="field", align="center">
+						<%= f.label :first_name %><br />
+						<%= f.text_field :first_name, placeholder: "Enter Your First Name"%>
+					</div>
+
+					<div class="field", align="center">
+						<%= f.label :last_name %><br />
+						<%= f.text_field :last_name, placeholder: "Enter Your Last Name"%>
+					</div>
+
+					<div class="field", align="center">
+						<%= f.label :age %><br />
+						<%= f.number_field :age, placeholder: "Enter Your Age"%>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary" data-bs-target="#page2" data-bs-toggle="modal" data-bs-dismiss="modal">Next</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal fade" id="page2" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalToggleLabel2">Modal 2</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="field", align="center">
+						<%= f.label :mobile_no %><br />
+						<%= f.number_field :mobile_no, placeholder: "Enter Your Mobile Number"%>
+					</div>
+
+					<div class="field", align="center">
+						<%= f.label :email %><br />
+						<%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+					</div>
+
+					<div class="field", align="center">
+						<%= f.label :password %>
+						<% if @minimum_password_length %>
+						<em>(<%= @minimum_password_length %> characters minimum)</em>
+						<% end %><br />
+						<%= f.password_field :password, autocomplete: "new-password" %>
+					</div>
+
+					<div class="field", align="center">
+						<%= f.label :password_confirmation %><br />
+						<%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<div class="actions">
+						<%= f.submit "Sign up" %>
+					</div>
+					<%end%>
+				</div>
+			</div>
+		</div>
+	</div>
+	<a class="btn btn-primary" data-bs-toggle="modal" href="#page1" role="button">Sign Up</a><br>
+	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	<script >
+		function submitMyForm(e) {
+			debugger 
+			var user = $("#new_user").serialize();
+			$.ajax({
+				method: "post",
+				url: "<%= users_url %>", 
+				data: user
+			});
+			$("#new_user")[0].reset()
+		}
+	</script>
+
+
+	-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+	<br>
+	<div class="modal fade" id="exampleModalToggle" aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabindex="-1">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalToggleLabel">Modal 1</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<%= render "devise/sessions/new" %>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<a class="btn btn-primary" data-bs-toggle="modal" href="#exampleModalToggle" role="button">Log In</a>
+
+
+	
+	<%end%>
+
+</fieldset>
